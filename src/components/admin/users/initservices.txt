@@ -1,0 +1,183 @@
+import { doc, setDoc, getDoc, collection, writeBatch, Timestamp, addDoc } from 'firebase/firestore';
+    import { firestore } from '../../lib/firebase/firestore';
+    import { DEFAULT_ROLES } from '../../config/permissions';
+    import { DEFAULT_DOCUMENT_CATEGORIES } from '../../config/defaultDocumentIndexes';
+    import { createDocumentIndex } from './documentIndexService';
+    import type { DocumentCategory } from '../../types/documentCategory';
+
+    const DEFAULT_ACCOUNT_TEMPLATES = [
+      {
+        id: 'account-opening',
+        name: 'Account Opening Documents',
+        isOptional: false,
+        entityType: 'account',
+        subfolders: []
+      },
+      {
+        id: 'account-statements',
+        name: 'Statements',
+        isOptional: false,
+        entityType: 'account',
+        subfolders: []
+      },
+      {
+        id: 'account-transfers',
+        name: 'Transfers',
+        isOptional: true,
+        entityType: 'account',
+        subfolders: []
+      },
+      {
+        id: 'account-loans',
+        name: 'Loan Documents',
+        isOptional: true,
+        entityType: 'account',
+        subfolders: [
+          { 
+            id: 'loan-application', 
+            name: 'Applications', 
+            isOptional: true, 
+            entityType: 'account', 
+            subfolders: [] 
+          },
+          { 
+            id: 'loan-collateral', 
+            name: 'Collateral', 
+            isOptional: true, 
+            entityType: 'account', 
+            subfolders: [] 
+          },
+          { 
+            id: 'loan-payments', 
+            name: 'Payment History', 
+            isOptional: true, 
+            entityType: 'account', 
+            subfolders: [] 
+          }
+        ]
+      }
+    ];
+
+    export async function initializeDatabase() {
+      try {
+        // Initialize roles
+        const adminRoleRef = doc(firestore, 'roles', 'admin');
+        const adminRoleDoc = await getDoc(adminRoleRef);
+
+        if (!adminRoleDoc.exists()) {
+          console.log('Roles collection not found. Creating roles...');
+          const batch = writeBatch(firestore);
+
+          // Create each role in the roles collection
+          for (const [id, role] of Object.entries(DEFAULT_ROLES)) {
+            console.log(`Creating role: ${id}`);
+            const roleRef = doc(firestore, 'roles', id);
+            batch.set(roleRef, {
+              id,
+              name: role.name,
+              description: role.description,
+              permissions: role.permissions,
+              createdAt: Timestamp.now()
+            });
+          }
+
+          await batch.commit();
+          console.log('Roles created successfully');
+        }
+
+        // Initialize account folder templates if they don't exist
+        const accountTemplatesRef = doc(firestore, 'settings', 'accountFolderTemplates');
+        const accountTemplatesDoc = await getDoc(accountTemplatesRef);
+
+        if (!accountTemplatesDoc.exists()) {
+          console.log('Initializing account folder templates...');
+          await setDoc(accountTemplatesRef, { templates: DEFAULT_ACCOUNT_TEMPLATES });
+          console.log('Account folder templates created successfully');
+        }
+
+        // Initialize document indexes and categories
+        const documentIndexesRef = collection(firestore, 'documentIndexes');
+        const documentCategoriesRef = collection(firestore, 'documentCategories');
+        const documentCategoriesSnapshot = await getDocs(documentCategoriesRef);
+
+        if (documentCategoriesSnapshot.empty) {
+          console.log('Initializing document indexes and categories...');
+          const batch = writeBatch(firestore);
+          const indexMap = new Map<string, string>();
+
+          // Create indexes first
+          for (const category of DEFAULT_DOCUMENT_CATEGORIES) {
+            for (const index of category.indexes) {
+              const indexRef = await addDoc(documentIndexesRef, {
+                ...index,
+                createdAt: Timestamp.now()
+              });
+              indexMap.set(index.indexLabel, indexRef.id);
+              console.log(`Created index: ${index.indexLabel} with ID: ${indexRef.id}`);
+            }
+          }
+
+          // Create categories and link to indexes
+          for (const category of DEFAULT_DOCUMENT_CATEGORIES) {
+            const indexIds = category.indexes.map(index => indexMap.get(index.indexLabel) || '');
+            const categoryRef = await addDoc(documentCategoriesRef, {
+              name: category.name,
+              indexes: indexIds,
+              createdAt: Timestamp.now()
+            });
+            console.log(`Created category: ${category.name} with ID: ${categoryRef.id} and indexes: ${indexIds}`);
+          }
+          await batch.commit();
+          console.log('Document indexes and categories created successfully');
+        }
+
+        // Ensure admin user has admin role
+        await assignAdminRole();
+        
+        console.log('Database initialization complete');
+      } catch (error) {
+        console.error('Error initializing database:', error);
+        throw error;
+      }
+    }
+
+    export async function assignAdminRole() {
+      const ADMIN_USER_ID = 'l5y1rCDFumdgqX0Feb4sGAeUWWJ2';
+      const ADMIN_EMAIL = 'aoumerzouk@hotmail.com';
+      
+      try {
+        console.log('Checking admin user and role...');
+        
+        // Create or update user document
+        const userRef = doc(firestore, 'users', ADMIN_USER_ID);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+          console.log('Creating admin user document...');
+          await setDoc(userRef, {
+            email: ADMIN_EMAIL,
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now()
+          });
+        }
+
+        // Create admin role assignment
+        const userRoleRef = doc(firestore, 'userRoles', `${ADMIN_USER_ID}_admin`);
+        const userRoleDoc = await getDoc(userRoleRef);
+
+        if (!userRoleDoc.exists()) {
+          console.log('Assigning admin role...');
+          await setDoc(userRoleRef, {
+            userId: ADMIN_USER_ID,
+            roleId: 'admin',
+            assignedAt: Timestamp.now()
+          });
+          console.log('Admin role assigned successfully');
+        } else {
+          console.log('Admin role already assigned');
+        }
+      } catch (error) {
+        console.error('Error assigning admin role:', error);
+        throw error;
+      }
+    }

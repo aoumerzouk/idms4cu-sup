@@ -1,0 +1,21 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "members": {
+      ".indexOn": ["dateJoined", "memberNumber"]
+    },
+    "accounts": {
+      ".indexOn": ["dateOpened"]
+    },
+    "documents": {
+      ".indexOn": ["createdAt"]
+    },
+    "userRoles": {
+      "$uid": {
+        ".read": "$uid === auth.uid || root.child('userRoles').child(auth.uid).child('admin').exists()",
+        ".write": "root.child('userRoles').child(auth.uid).child('admin').exists()"
+      }
+    }
+  }
+}

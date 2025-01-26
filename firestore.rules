@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/userRoles/$(request.auth.uid)_$(role));
+    }
+
+    match /{document=**} {
+      allow read: if isAuthenticated();
+    }
+
+    match /members/{memberId} {
+      allow write: if isAuthenticated() && (hasRole('admin') || hasRole('document_manager'));
+    }
+
+    match /accounts/{accountId} {
+      allow write: if isAuthenticated() && (hasRole('admin') || hasRole('document_manager'));
+    }
+
+    match /documents/{documentId} {
+      allow write: if isAuthenticated() && (hasRole('admin') || hasRole('document_manager'));
+    }
+
+    match /userRoles/{userRoleId} {
+      allow read: if isAuthenticated();
+      allow write: if hasRole('admin');
+    }
+  }
+}
