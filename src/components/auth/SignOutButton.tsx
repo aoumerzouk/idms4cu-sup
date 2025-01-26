@@ -1,5 +1,6 @@
 import { useAuth } from '../../contexts/AuthContext';
 import { LogOut } from 'lucide-react';
+import React from 'react';
 
 export default function SignOutButton() {
   const { signOut } = useAuth();

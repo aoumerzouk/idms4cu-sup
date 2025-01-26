@@ -5,6 +5,7 @@ import { PermissionProvider } from './contexts/PermissionContext';
 import App from './App';
 import './index.css';
 import { initializeDatabase } from './services/db/initService';
+import { BrowserRouter } from 'react-router-dom';
 
 const root = document.getElementById('root');
 if (!root) throw new Error('Root element not found');
@@ -14,11 +15,13 @@ initializeDatabase()
   .then(() => {
     createRoot(root).render(
       <StrictMode>
-        <AuthProvider>
-          <PermissionProvider>
-            <App />
-          </PermissionProvider>
-        </AuthProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <PermissionProvider>
+              <App />
+            </PermissionProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </StrictMode>
     );
   })
@@ -27,11 +30,13 @@ initializeDatabase()
     // Still render the app, but it might have limited functionality
     createRoot(root).render(
       <StrictMode>
-        <AuthProvider>
-          <PermissionProvider>
-            <App />
-          </PermissionProvider>
-        </AuthProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <PermissionProvider>
+              <App />
+            </PermissionProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </StrictMode>
     );
   });
