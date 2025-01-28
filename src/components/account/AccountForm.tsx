@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Account, AccountType } from '../../types/account';
 import { ACCOUNT_TYPE_CODES, generateAccountNumber } from '../../utils/accountUtils';
 import { supabase } from '../../lib/supabase';
+import { useMembers } from '../../hooks/useMembers';
 
 interface AccountFormProps {
   memberId: string;
@@ -18,10 +19,10 @@ export default function AccountForm({ memberId, onSubmit }: AccountFormProps) {
     balance: '0.00'
   });
   const [error, setError] = React.useState<string | null>(null);
-  const [customerTypes, setCustomerTypes] = useState<{ CustomerTypeID: string, Name: string }[]>([]);
+  const [accountTypes, setAccountTypes] = useState<{ CustomerTypeID: string, Name: string }[]>([]);
 
   useEffect(() => {
-    const fetchCustomerTypes = async () => {
+    const fetchAccountTypes = async () => {
       try {
         const { data, error } = await supabase
           .from('customertype')
@@ -32,14 +33,14 @@ export default function AccountForm({ memberId, onSubmit }: AccountFormProps) {
           throw new Error('Failed to load customer types');
         }
         
-        setCustomerTypes(data);
+        setAccountTypes(data);
       } catch (err) {
         console.error('Error fetching customer types:', err);
         setError('Failed to load customer types');
       }
     };
 
-    fetchCustomerTypes();
+    fetchAccountTypes();
   }, []);
 
   useEffect(() => {
@@ -116,7 +117,7 @@ export default function AccountForm({ memberId, onSubmit }: AccountFormProps) {
               }));
             }}
           >
-            {customerTypes.map(type => (
+            {accountTypes.map(type => (
               <option key={type.CustomerTypeID} value={type.Name.toLowerCase()}>
                 {type.Name}
               </option>

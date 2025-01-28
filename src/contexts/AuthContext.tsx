@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session,  useSession,  useSupabaseClient } from '@supabase/auth-helpers-react';
 import * as authService from '../services/authService';
@@ -70,4 +69,3 @@ export function useAuth() {
   }
   return context;
 }
-</boltArtifact>
