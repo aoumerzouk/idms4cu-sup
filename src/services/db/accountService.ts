@@ -101,7 +101,8 @@ export async function createAccount(
       .from('customeraccount')
       .insert([{
         CustomerID: memberId,
-        AccountID: newAccountId
+        AccountID: newAccountId,
+        CustomerAccountRelationTypeID: '77777777-7777-7777-7777-777777777777'
       }]);
 
     if (customerAccountError) {

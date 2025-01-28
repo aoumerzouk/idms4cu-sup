@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Account, AccountType } from '../../types/account';
 import { ACCOUNT_TYPE_CODES, generateAccountNumber } from '../../utils/accountUtils';
-import { useMembers } from '../../hooks/useMembers';
+import { supabase } from '../../lib/supabase';
 
 interface AccountFormProps {
   memberId: string;
@@ -18,12 +18,35 @@ export default function AccountForm({ memberId, onSubmit }: AccountFormProps) {
     balance: '0.00'
   });
   const [error, setError] = React.useState<string | null>(null);
+  const [customerTypes, setCustomerTypes] = useState<{ CustomerTypeID: string, Name: string }[]>([]);
+
+  useEffect(() => {
+    const fetchCustomerTypes = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('customertype')
+          .select('CustomerTypeID, Name');
+        
+        if (error) {
+          console.error('Error fetching customer types:', error);
+          throw new Error('Failed to load customer types');
+        }
+        
+        setCustomerTypes(data);
+      } catch (err) {
+        console.error('Error fetching customer types:', err);
+        setError('Failed to load customer types');
+      }
+    };
+
+    fetchCustomerTypes();
+  }, []);
 
   useEffect(() => {
     if (memberId) {
       const member = members.find(m => m.id === memberId);
       if (member) {
-        setFormData(prev => ({ ...prev, base: member.memberNumber }));
+        setFormData(prev => ({ ...prev, base: member.memberNumber || '' }));
       }
     }
   }, [memberId, members]);
@@ -76,7 +99,7 @@ export default function AccountForm({ memberId, onSubmit }: AccountFormProps) {
             pattern="[0-9]{1,7}"
             className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
             value={formData.base}
-            onChange={e => setFormData(prev => ({ ...prev, base: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, base: e.target.value || '' }))}
           />
         </div>
         <div>
@@ -93,12 +116,11 @@ export default function AccountForm({ memberId, onSubmit }: AccountFormProps) {
               }));
             }}
           >
-            <option value="share">Share (Savings)</option>
-            <option value="draft">Draft (Checking)</option>
-            <option value="certificate">Certificate</option>
-            <option value="moneyMarket">Money Market</option>
-            <option value="loan">Loan</option>
-            <option value="lineOfCredit">Line of Credit</option>
+            {customerTypes.map(type => (
+              <option key={type.CustomerTypeID} value={type.Name.toLowerCase()}>
+                {type.Name}
+              </option>
+            ))}
           </select>
         </div>
         <div>
@@ -110,7 +132,7 @@ export default function AccountForm({ memberId, onSubmit }: AccountFormProps) {
             pattern="[0-9]{1,3}"
             className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white"
             value={formData.suffix}
-            onChange={e => setFormData(prev => ({ ...prev, suffix: e.target.value }))}
+            onChange={e => setFormData(prev => ({ ...prev, suffix: e.target.value || '000' }))}
           />
         </div>
       </div>
