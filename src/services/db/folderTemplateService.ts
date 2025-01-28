@@ -25,15 +25,14 @@ export async function getFolderTemplates(
     const { data, error } = await supabase
       .from('settings')
       .select('templates')
-      .eq('id', `${entityType}FolderTemplates`)
-      .single();
+      .eq('id', `${entityType}FolderTemplates`);
     
     if (error) {
       console.error('Error fetching folder templates:', error);
       return [];
     }
     
-    return data?.templates || [];
+    return data?.[0]?.templates || [];
   } catch (error) {
     console.error('Error fetching folder templates:', error);
     return [];

@@ -22,7 +22,7 @@ export function PermissionProvider({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     async function loadUserRoles() {
-      if (!user) {
+      if (!user || !user.uid) {
         setRoles([]);
         setLoading(false);
         return;

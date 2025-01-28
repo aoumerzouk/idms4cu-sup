@@ -9,7 +9,7 @@ export async function getAccounts(): Promise<Account[]> {
     const { data, error } = await supabase
       .from('account')
       .select('*')
-      .order('opened', { ascending: false });
+      .order('Opened', { ascending: false });
     
     if (error) {
       console.error('Error fetching accounts:', error);
@@ -75,6 +75,7 @@ export async function createAccount(
           type: accountData.type,
           Status: accountData.status,
           Opened: new Date().toISOString(),
+          memberIds: [memberId],
           Balance: accountData.balance,
           CreatedDate: new Date().toISOString(),
           UpdatedDate: new Date().toISOString(),
@@ -95,20 +96,6 @@ export async function createAccount(
       console.error('Error creating account:', error);
       throw new Error('Failed to create account');
     }
-
-    // Create the relationship in customeraccount table
-    const { error: customerAccountError } = await supabase
-      .from('customeraccount')
-      .insert([{
-        CustomerID: memberId,
-        AccountID: newAccountId,
-        CustomerAccountRelationTypeID: '77777777-7777-7777-7777-777777777777'
-      }]);
-
-    if (customerAccountError) {
-      console.error('Error creating customer account relationship:', customerAccountError);
-      throw new Error('Failed to create customer account relationship');
-    }
     
     // Create folder structure for the new account
     await createFoldersFromTemplate('account', data.AccountID);
@@ -123,7 +110,7 @@ export async function createAccount(
       type: data.type,
       status: data.Status,
       dateOpened: new Date(data.Opened),
-      memberIds: [memberId],
+      memberIds: data.memberIds,
       balance: data.Balance
     };
   } catch (error) {
