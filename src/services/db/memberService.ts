@@ -19,10 +19,26 @@ export async function getMembers(): Promise<Member[]> {
     firstName: item.FirstName,
     lastName: item.LastName,
     memberNumber: item.CustomerNumber,
-    email: item.Email,
+    email: item.Email ? [item.Email] : [],
     dateJoined: new Date(item.CreatedDate),
     middleName: item.MiddleName,
-    SSN: item.SSN
+    SSN: item.SSN,
+    OtherID: item.OtherID,
+    OtherIDType: item.OtherIDType,
+    BirthDate: item.BirthDate ? new Date(item.BirthDate) : undefined,
+    CompanyName: item.CompanyName,
+    address: {
+      street: item.AddressID || '',
+      city: '',
+      state: '',
+      zipCode: ''
+    },
+    phone: {
+      primary: '',
+      secondary: ''
+    },
+    createdAt: new Date(item.CreatedDate),
+    updatedAt: item.UpdatedDate ? new Date(item.UpdatedDate) : undefined
   }));
 }
 
@@ -45,8 +61,6 @@ export async function createMember(memberData: Omit<Member, 'id' | 'dateJoined'>
         Email: memberData.email[0],
         ExternalID: memberData.ExternalID,
         Photo: memberData.Photo,
-        AddressID: memberData.AddressID,
-        PhotoType: memberData.PhotoType,
         CreatedDate: new Date().toISOString(),
         UpdatedDate: new Date().toISOString()
       }
@@ -64,9 +78,25 @@ export async function createMember(memberData: Omit<Member, 'id' | 'dateJoined'>
     firstName: data.FirstName,
     lastName: data.LastName,
     memberNumber: data.CustomerNumber,
-    email: data.Email,
+    email: data.Email ? [data.Email] : [],
     dateJoined: new Date(data.CreatedDate),
     middleName: data.MiddleName,
-    SSN: data.SSN
+    SSN: data.SSN,
+    OtherID: data.OtherID,
+    OtherIDType: data.OtherIDType,
+    BirthDate: data.BirthDate ? new Date(data.BirthDate) : undefined,
+    CompanyName: data.CompanyName,
+    address: {
+      street: data.AddressID || '',
+      city: '',
+      state: '',
+      zipCode: ''
+    },
+    phone: {
+      primary: '',
+      secondary: ''
+    },
+    createdAt: new Date(data.CreatedDate),
+    updatedAt: data.UpdatedDate ? new Date(data.UpdatedDate) : undefined
   };
 }
