@@ -28,10 +28,10 @@ export async function getMembers(): Promise<Member[]> {
     BirthDate: item.BirthDate ? new Date(item.BirthDate) : undefined,
     CompanyName: item.CompanyName,
     address: {
-      street: item.AddressID || '',
-      city: '',
-      state: '',
-      zipCode: ''
+      street: item.Address1 || '',
+      city: item.City || '',
+      state: item.State || '',
+      zipCode: item.PostalCode || ''
     },
     phone: {
       primary: '',
@@ -61,6 +61,10 @@ export async function createMember(memberData: Omit<Member, 'id' | 'dateJoined'>
         Email: memberData.email[0],
         ExternalID: memberData.ExternalID,
         Photo: memberData.Photo,
+        Address1: memberData.address?.street,
+        City: memberData.address?.city,
+        State: memberData.address?.state,
+        PostalCode: memberData.address?.zipCode,
         CreatedDate: new Date().toISOString(),
         UpdatedDate: new Date().toISOString()
       }
@@ -87,10 +91,10 @@ export async function createMember(memberData: Omit<Member, 'id' | 'dateJoined'>
     BirthDate: data.BirthDate ? new Date(data.BirthDate) : undefined,
     CompanyName: data.CompanyName,
     address: {
-      street: data.AddressID || '',
-      city: '',
-      state: '',
-      zipCode: ''
+      street: data.Address1 || '',
+      city: data.City || '',
+      state: data.State || '',
+      zipCode: data.PostalCode || ''
     },
     phone: {
       primary: '',

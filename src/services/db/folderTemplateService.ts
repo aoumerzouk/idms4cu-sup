@@ -21,16 +21,21 @@ export async function saveFolderTemplates(
 export async function getFolderTemplates(
   entityType: 'member' | 'account'
 ): Promise<FolderTemplate[]> {
-  const { data, error } = await supabase
-    .from('settings')
-    .select('templates')
-    .eq('id', `${entityType}FolderTemplates`)
-    .single();
-  
-  if (error) {
+  try {
+    const { data, error } = await supabase
+      .from('settings')
+      .select('templates')
+      .eq('id', `${entityType}FolderTemplates`)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching folder templates:', error);
+      return [];
+    }
+    
+    return data?.templates || [];
+  } catch (error) {
     console.error('Error fetching folder templates:', error);
-    throw new Error('Failed to load folder templates');
+    return [];
   }
-  
-  return data?.templates || [];
 }

@@ -19,14 +19,12 @@ export default function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) 
     BirthDate: undefined,
     Email: '',
     ExternalID: '',
-    Photo: '',
-    PhotoType: '',
-    AddressID: '',
-    ExtraField1: '',
-    ExtraField2: '',
-    ExtraField3: '',
-    ExtraField4: '',
-    ExtraField5: ''
+    Address1: '',
+    Address2: '',
+    City: '',
+    State: '',
+    PostalCode: '',
+    Country: ''
   });
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -172,29 +170,37 @@ export default function CustomerForm({ onSubmit, onCancel }: CustomerFormProps) 
         <input
           type="text"
           placeholder="Address Line 1"
-          value={formData.AddressID || ''}
-          onChange={e => setFormData({ ...formData, AddressID: e.target.value })}
+          value={formData.Address1 || ''}
+          onChange={e => setFormData({ ...formData, Address1: e.target.value })}
           className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
         />
         <input
           type="text"
           placeholder="Address Line 2"
+          value={formData.Address2 || ''}
+          onChange={e => setFormData({ ...formData, Address2: e.target.value })}
           className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
         />
         <div className="grid grid-cols-3 gap-4">
           <input
             type="text"
             placeholder="City"
+            value={formData.City || ''}
+            onChange={e => setFormData({ ...formData, City: e.target.value })}
             className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
           <input
             type="text"
             placeholder="State"
+            value={formData.State || ''}
+            onChange={e => setFormData({ ...formData, State: e.target.value })}
             className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
           <input
             type="text"
             placeholder="Postal Code"
+            value={formData.PostalCode || ''}
+            onChange={e => setFormData({ ...formData, PostalCode: e.target.value })}
             className="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
         </div>

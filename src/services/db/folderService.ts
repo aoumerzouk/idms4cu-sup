@@ -68,26 +68,31 @@ export async function createFoldersFromTemplate(entityType: 'member' | 'account'
 }
 
 export async function getFolders(entityType: 'member' | 'account', entityId: string): Promise<Folder[]> {
-  const { data, error } = await supabase
-    .from('folders')
-    .select('*')
-    .eq('entitytype', entityType)
-    .eq('entityid', entityId)
-    .order('created_at', { ascending: false });
-  
-  if (error) {
+  try {
+    const { data, error } = await supabase
+      .from('folders')
+      .select('*')
+      .eq('entitytype', entityType)
+      .eq('entityid', entityId)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error fetching folders:', error);
+      return [];
+    }
+    
+    return data.map(item => ({
+      id: item.id,
+      name: item.name,
+      isOptional: item.isoptional,
+      parentId: item.parentid,
+      entityType: item.entitytype,
+      entityId: item.entityid,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }));
+  } catch (error) {
     console.error('Error fetching folders:', error);
-    throw new Error('Failed to load folders');
+    return [];
   }
-  
-  return data.map(item => ({
-    id: item.id,
-    name: item.name,
-    isOptional: item.isoptional,
-    parentId: item.parentid,
-    entityType: item.entitytype,
-    entityId: item.entityid,
-    createdAt: item.created_at,
-    updatedAt: item.updated_at
-  }));
 }
